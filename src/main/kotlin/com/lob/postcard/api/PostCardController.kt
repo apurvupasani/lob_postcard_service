@@ -25,6 +25,7 @@ class PostCardController(
 ) {
     @GetMapping(
         value = ["/postcard/addresses"],
+        consumes = ["application/json"],
         produces = ["application/json"]
     )
     fun getAddresses(

@@ -8,6 +8,7 @@ enum class Error(val message: String) {
     CityCannotBeEmpty("City cannot be empty"),
     StateCannotBeEmpty("State cannot be empty"),
     ZipCodeCannotBeEmpty("City cannot be empty"),
-    ZipCodeMustBeANumber("ZipCode must be a 6 digit number"),
-    StateMustBeTwoAlphabets("State must be 2 character alphabets")
+    ZipCodeMustBeANumber("ZipCode must be a 5 digit number"),
+    StateMustBeTwoAlphabets("State must be 2 character alphabets"),
+    DuplicateRecord("Duplicate record exists in datastore")
 }

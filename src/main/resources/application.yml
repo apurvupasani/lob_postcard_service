@@ -16,6 +16,6 @@ info:
   name: lob_postcard_service
 
 server:
-  port: 8090
+  port: 8080
   error:
     includeStacktrace: ALWAYS

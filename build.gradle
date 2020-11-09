@@ -29,7 +29,7 @@ apply plugin: "maven-publish"
 //noinspection GroovyAssignabilityCheck
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
 }
 
@@ -62,11 +62,12 @@ dependencies {
     implementation "io.arrow-kt:arrow-syntax:${versions.arrow}"
 }
 
+bootJar {
+    mainClassName = "Application"
+    archiveFileName = "lob-postcard-service.jar"
+}
+
 bootRun {
     args = ["--spring.profiles.active=dev"]
     jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:12345"]
-}
-
-bootJar {
-    archiveFileName = "lob-postcard-service.jar"
 }

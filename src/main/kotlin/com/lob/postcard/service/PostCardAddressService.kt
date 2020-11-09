@@ -7,6 +7,7 @@ import arrow.core.extensions.list.foldable.nonEmpty
 import com.lob.postcard.domain.PostalAddress
 import com.lob.postcard.domain.enums.Error
 import com.lob.postcard.domain.enums.Error.CityCannotBeEmpty
+import com.lob.postcard.domain.enums.Error.DuplicateRecord
 import com.lob.postcard.domain.enums.Error.Line1AndLine2CantBeEmpty
 import com.lob.postcard.domain.enums.Error.StateCannotBeEmpty
 import com.lob.postcard.domain.enums.Error.StateMustBeTwoAlphabets
@@ -36,8 +37,11 @@ class PostCardAddressService(
             else ->
                 postalAddressRepository.addAddress(requestBody)
                     .map {
-                        val result = if (it) "Success" else "Fail"
-                        Right(result)
+                       if (it) {
+                           Right("Success")
+                       } else {
+                           Left(listOf(DuplicateRecord))
+                       }
                     }
         }
     }
@@ -60,7 +64,7 @@ class PostCardAddressService(
         if (requestBody.zip.isNullOrBlank()) {
             errorList.add(ZipCodeCannotBeEmpty)
         }
-        if (requestBody.zip?.length != 6 && requestBody.zip?.toIntOrNull() != null) {
+        if (requestBody.zip?.length != 5 && requestBody.zip?.toIntOrNull() != null) {
             errorList.add(ZipCodeMustBeANumber)
         }
         return errorList.toList()
