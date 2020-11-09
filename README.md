@@ -21,6 +21,15 @@ Request Body:
     "zip": "94133"
 }
 ````
+Response Body:
+
+```
+{
+    "id": 9 // Id in case  we need to update
+}
+```
+
+
 Sample Request
 ```
 curl -X POST \
@@ -43,7 +52,64 @@ curl -X POST \
 |  State |     Yes     | Must be a two character alphabet string |
 |   Zip  |     Yes     | Must be a. 5 digit number               |
 
-### Get addresses API spec
+### Update address API spec
+
+Url: /postcard/address/{id} <br/>
+Method: PUT <br/>
+Authentication: NA (currently not setup but can be managed using headers) <br/>
+Headers: Content-Type: application/json <br/>
+
+Request Body: 
+````
+{
+    "line1": "1600 Holloway Ave",
+    "line2": "Apt 200",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip": "94133"
+}
+````
+
+Response Body:
+
+```
+{
+    "updatedRecord": {
+        "line1": "1600 Holloway",
+        "line2": "Ave",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94131"
+    }
+}
+
+```
+ 
+Sample Request
+```
+curl -X PUT \
+  http://localhost:8080/postcard/address/9 \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -H 'postman-token: 6a0e12fa-299f-5109-f71f-34dd9eed2221' \
+  -d '{
+	"line1": "1600 Holloway",
+	"line2": "Ave"
+}'
+```
+One of the field must be mandatory
+
+|  <b>Field</b> |  <b>Mandatory</b>  |                  <b>Notes  </b>             |
+|:------:|:-----------:|:---------------------------------------:|
+| Line 1 | Conditional |          |
+| Line 2 | Conditional |       |
+|  City  | Conditional     |                                         |
+|  State | Conditional     | Must be a two character alphabet string |
+|   Zip  |  Conditional     | Must be a. 5 digit number               |
+
+
+
+### Get addresses (query) API spec
 
 Url: /postcard/addresses <br/>
 Method: GET <br/>

@@ -9,7 +9,7 @@ management:
     web:
       base-path: /
       exposure:
-        include: info, health, beans, env
+        include: info
     enabled-by-default: true
 
 info:
@@ -17,5 +17,3 @@ info:
 
 server:
   port: 8080
-  error:
-    includeStacktrace: ALWAYS

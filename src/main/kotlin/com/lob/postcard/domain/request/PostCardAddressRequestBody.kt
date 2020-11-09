@@ -2,7 +2,7 @@ package com.lob.postcard.domain.request
 
 import com.lob.postcard.domain.PostalAddress
 
-data class PostCardAddressAddRequestBody(
+data class PostCardAddressRequestBody(
     val line1: String?,
     val line2: String?,
     val city: String?,

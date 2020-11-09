@@ -2,16 +2,19 @@ package com.lob.postcard.api
 
 import com.lob.postcard.domain.enums.Error
 import com.lob.postcard.domain.enums.Error.UnExpectedError
-import com.lob.postcard.domain.request.PostCardAddressAddRequestBody
+import com.lob.postcard.domain.request.PostCardAddressRequestBody
 import com.lob.postcard.domain.response.PostCardAddressAddResponse
 import com.lob.postcard.domain.response.PostCardAddressResponse
+import com.lob.postcard.domain.response.PostCardAddressUpdateResponse
 import com.lob.postcard.service.PostCardAddressService
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
@@ -36,7 +39,7 @@ class PostCardController(
             .map { response ->
                 response.fold(
                     { PostCardAddressResponse(errors = listOf(it.message)).toResponseEntity(it) },
-                    { PostCardAddressResponse(addresses = it.map { it.toGetPostalCardAddress() }).toResponseEntity() }
+                    { PostCardAddressResponse(addresses = it.map { it.toResponsePostalCardAddress() }).toResponseEntity() }
                 )
             }
             .onErrorResume {
@@ -52,17 +55,40 @@ class PostCardController(
     @ResponseStatus(HttpStatus.OK)
     fun addAddress(
         @RequestHeader headers: HttpHeaders,
-        @RequestBody requestBody: PostCardAddressAddRequestBody
+        @RequestBody requestBody: PostCardAddressRequestBody
     ): Mono<ResponseEntity<PostCardAddressAddResponse>> =
         postCardAddressService.addAddress(requestBody)
             .map { response ->
                 response.fold(
                     { PostCardAddressAddResponse(errors = it.map { it.message }).toResponseEntity(it.first()) },
-                    { PostCardAddressAddResponse(result = it).toResponseEntity() }
+                    { PostCardAddressAddResponse(id = it).toResponseEntity() }
                 )
             }
             .onErrorResume {
                 PostCardAddressAddResponse(errors = listOf(UnExpectedError.message))
+                    .toResponseEntity(UnExpectedError).toMono()
+            }
+
+    @PutMapping(
+        value = ["/postcard/address/{id}"],
+        consumes = ["application/json"],
+        produces = ["application/json"]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    fun updateAddress(
+        @RequestHeader headers: HttpHeaders,
+        @PathVariable(value="id") addressId: String?,
+        @RequestBody requestBody: PostCardAddressRequestBody
+    ): Mono<ResponseEntity<PostCardAddressUpdateResponse>> =
+        postCardAddressService.updateAddress(addressId, requestBody)
+            .map { response ->
+                response.fold(
+                    { PostCardAddressUpdateResponse(errors = it.map { it.message }).toResponseEntity(it.first()) },
+                    { PostCardAddressUpdateResponse(updatedRecord = it.toResponsePostalCardAddress()).toResponseEntity() }
+                )
+            }
+            .onErrorResume {
+                PostCardAddressUpdateResponse(errors = listOf(UnExpectedError.message))
                     .toResponseEntity(UnExpectedError).toMono()
             }
 
