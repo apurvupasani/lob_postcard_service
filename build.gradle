@@ -1,20 +1,19 @@
 buildscript {
-
     ext.versions = [
-            "arrow"                 : "0.11.0",
-            "guava"                 : "29.0-jre",
-            "h2"                    : "1.4.199",
+            "arrow"                 : "0.10.5",
+            "jacksonDataTypes"      : "2.9.5",
             "kotlin"                : "1.4.10",
-            "kotlinJackson"         : "2.11.2",
+            "kotlinJackson"         : "2.11.3",
             "kotlinReactorExtension": "1.0.2.RELEASE",
             "reactor"               : "3.3.10.RELEASE",
-            "springBoot"            : "2.3.4.RELEASE"
+            "springBoot"            : "2.3.4.RELEASE",
     ]
 
     repositories {
         mavenCentral()
         maven { url = "https://plugins.gradle.org/m2/" }
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-allopen:${versions.kotlin}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
@@ -22,68 +21,53 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
-        maven { url 'https://repo.spring.io/milestone' }
+apply plugin: "kotlin"
+apply plugin: "kotlin-spring"
+apply plugin: "org.springframework.boot"
+apply plugin: "maven-publish"
 
-        mavenCentral()
-        jcenter()
-        mavenLocal()
+//noinspection GroovyAssignabilityCheck
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
+repositories {
 
-subprojects {
+    maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
+    maven { url 'https://repo.spring.io/milestone' }
 
-    apply plugin: "kotlin"
-    apply plugin: "kotlin-spring"
+    mavenCentral()
+    jcenter()
+    mavenLocal()
+}
 
-    dependencies {
-
-        // kotlin
-        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
-        implementation "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
-        implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${versions.kotlinJackson}"
-
-        // spring boot & reactive stream
-        implementation "org.springframework.boot:spring-boot-starter-webflux:${versions.springBoot}"
-        implementation "org.springframework.boot:spring-boot-starter-actuator:${versions.springBoot}"
-        implementation "org.springframework.data:spring-data-jpa:${versions.springBoot}"
-        implementation "org.springframework.boot:spring-boot-starter-data-jpa:${versions.springBoot}"
-        implementation "io.projectreactor:reactor-core:${versions.reactor}"
-        implementation "io.projectreactor.kotlin:reactor-kotlin-extensions:${versions.kotlinReactorExtension}"
-
-        // Caching
-        implementation "com.google.guava:guava:${versions.guava}"
+dependencies {
+    // kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${versions.kotlinJackson}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${versions.jacksonDataTypes}"
 
 
-        compile "io.arrow-kt:arrow-core:${versions.arrow}"
-        compile "io.arrow-kt:arrow-syntax:${versions.arrow}"
-        compile "io.arrow-kt:arrow-mtl:${versions.arrow}"
-        compile "io.arrow-kt:arrow-mtl-data:${versions.arrow}"
-        compile "io.arrow-kt:arrow-fx-reactor:${versions.arrow}"
-    }
+    // spring boot & reactive stream
+    implementation "org.springframework.boot:spring-boot-starter-webflux:${versions.springBoot}"
+    implementation "org.springframework.boot:spring-boot-starter-actuator:${versions.springBoot}"
+    implementation "io.projectreactor:reactor-core:${versions.reactor}"
+    implementation "io.projectreactor.kotlin:reactor-kotlin-extensions:${versions.kotlinReactorExtension}"
 
-    bootRun {
-        args = ["--spring.profiles.active=dev"]
-        jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:12345"]
-    }
+    // Arrow
+    implementation "io.arrow-kt:arrow-core:${versions.arrow}"
+    implementation "io.arrow-kt:arrow-syntax:${versions.arrow}"
+}
 
-    bootJar {
-        archiveFileName = "lob-postcard-service.jar"
-    }
+bootJar {
+    mainClassName = "Application"
+    archiveFileName = "lob-postcard-service.jar"
+}
 
-    //noinspection GroovyAssignabilityCheck
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
-    }
-
-    compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-
-    build.dependsOn check
+bootRun {
+    args = ["--spring.profiles.active=dev"]
+    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:12345"]
 }
