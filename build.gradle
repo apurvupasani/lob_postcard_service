@@ -65,6 +65,15 @@ subprojects {
         compile "io.arrow-kt:arrow-fx-reactor:${versions.arrow}"
     }
 
+    bootRun {
+        args = ["--spring.profiles.active=dev"]
+        jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:12345"]
+    }
+
+    bootJar {
+        archiveFileName = "lob-postcard-service.jar"
+    }
+
     //noinspection GroovyAssignabilityCheck
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
