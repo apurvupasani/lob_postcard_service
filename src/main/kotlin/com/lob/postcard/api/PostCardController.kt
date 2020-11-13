@@ -1,9 +1,11 @@
 package com.lob.postcard.api
 
+import arrow.core.Some
 import com.lob.postcard.domain.enums.Error
 import com.lob.postcard.domain.enums.Error.UnExpectedError
 import com.lob.postcard.domain.request.PostCardAddressRequestBody
 import com.lob.postcard.domain.response.PostCardAddressAddResponse
+import com.lob.postcard.domain.response.PostCardAddressDeleteResponse
 import com.lob.postcard.domain.response.PostCardAddressResponse
 import com.lob.postcard.domain.response.PostCardAddressUpdateResponse
 import com.lob.postcard.service.PostCardAddressService
@@ -47,6 +49,25 @@ class PostCardController(
                     .toResponseEntity(UnExpectedError).toMono()
             }
 
+    @GetMapping(
+            value = ["/postcard/addresses-all"],
+            consumes = ["application/json"],
+            produces = ["application/json"]
+    )
+    fun getAddressesAll(
+            @RequestHeader headers: HttpHeaders
+    ): Mono<ResponseEntity<PostCardAddressResponse>> =
+            postCardAddressService.listAddresses()
+                    .map { response ->
+                        PostCardAddressResponse(
+                            addresses = response.map { it.toResponsePostalCardAddress() }
+                        ).toResponseEntity()
+                    }
+                    .onErrorResume {
+                        PostCardAddressResponse(errors = listOf(UnExpectedError.message))
+                                .toResponseEntity(UnExpectedError).toMono()
+                    }
+
     @PostMapping(
         value = ["/postcard/address"],
         consumes = ["application/json"],
@@ -68,6 +89,26 @@ class PostCardController(
                 PostCardAddressAddResponse(errors = listOf(UnExpectedError.message))
                     .toResponseEntity(UnExpectedError).toMono()
             }
+
+    @PutMapping(
+            value = ["/postcard/delete/{id}"],
+            consumes = ["application/json"],
+            produces = ["application/json"]
+    )
+    @ResponseStatus(HttpStatus.OK)
+    fun deleteAddress(
+        @RequestHeader headers: HttpHeaders,
+        @PathVariable(value="id") addressId: String?,
+    ): Mono<ResponseEntity<PostCardAddressDeleteResponse>> =
+            postCardAddressService.deleteAddress(addressId)
+                    .map{
+                        when {
+                            it is Some -> PostCardAddressDeleteResponse(errors = listOf(it.t.message)).toResponseEntity()
+                            else -> PostCardAddressDeleteResponse(isSuccess = true).toResponseEntity()
+                        }
+                    }
+
+
 
     @PutMapping(
         value = ["/postcard/address/{id}"],

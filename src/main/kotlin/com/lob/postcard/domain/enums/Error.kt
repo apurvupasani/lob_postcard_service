@@ -15,4 +15,6 @@ enum class Error(val message: String) {
     AddressIdNotANumber("Address Id must be number"),
     EmptyUpdateRequest("Update Request cannot be empty"),
     RecordNotFound("Address not found"),
+    InvalidId("Invalid id found"),
+    EmptyId("Id cannot be empty"),
 }

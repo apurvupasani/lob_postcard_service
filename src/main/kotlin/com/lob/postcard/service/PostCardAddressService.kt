@@ -1,9 +1,6 @@
 package com.lob.postcard.service
 
-import arrow.core.Either
-import arrow.core.Left
-import arrow.core.Right
-import arrow.core.Some
+import arrow.core.*
 import arrow.core.extensions.list.foldable.nonEmpty
 import com.lob.postcard.domain.PostalAddress
 import com.lob.postcard.domain.enums.Error
@@ -24,6 +21,22 @@ class PostCardAddressService(
             null -> postalAddressRepository.getAddresses(query.cleanUp()).map { Right(it) }
             else -> Left(validatedResult).toMono()
         }
+
+    fun listAddresses(): Mono<List<PostalAddress>> = postalAddressRepository.listAddresses()
+
+    fun deleteAddress(id: String?): Mono<Option<Error>> =
+        when(val validatedResult = validatePostCardId(id)) {
+            null -> postalAddressRepository.deleteAddress(id.cleanUp().toIntOrNull()?: -1)
+                    .map {
+                        if(it) {
+                            Some(InvalidId)
+                        } else {
+                            None
+                        }
+                    }
+            else -> validatedResult.toOption().toMono()
+        }
+
 
     fun addAddress(requestBody: PostCardAddressRequestBody): Mono<Either<List<Error>, Int>> {
         val validatedResult = validateAddAddress(requestBody)
@@ -112,4 +125,11 @@ class PostCardAddressService(
             query.length > 100 -> Error.InvalidQuery
             else -> null
         }
+
+    private fun validatePostCardId(id: String?): Error? =
+            when {
+                id.isNullOrBlank() -> Error.EmptyId
+                id.length > 100 -> Error.InvalidId
+                else -> null
+            }
 }

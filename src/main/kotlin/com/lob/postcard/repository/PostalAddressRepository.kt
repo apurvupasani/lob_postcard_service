@@ -37,11 +37,22 @@ open class PostalAddressRepository {
             }
     }
 
+    fun listAddresses(): Mono<List<PostalAddress>> {
+        synchronized(localAddressMap) {
+            return localAddressMap.values.toList().toMono()
+        }
+    }
+
+    fun deleteAddress(id: Int): Mono<Boolean> {
+        synchronized(localAddressMap) {
+            return (localAddressMap.remove(id) == null).toMono()
+        }
+    }
+
     fun getAddresses(query: String): Mono<List<PostalAddress>> {
         synchronized(localAddressMap) {
-            return localAddressMap.values
-                .filter { it.cleanAddress.contains(query, true) }
-                .toMono()
+            return listAddresses()
+                .map { it.filter { it.cleanAddress.contains(query, true) } }
         }
     }
 
