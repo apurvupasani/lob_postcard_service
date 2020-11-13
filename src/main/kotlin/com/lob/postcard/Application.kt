@@ -8,4 +8,4 @@ fun main(args: Array<String>) {
 }
 
 @SpringBootApplication(scanBasePackages = ["com.lob.postcard"])
-open class Application
+class Application
